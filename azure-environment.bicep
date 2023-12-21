@@ -30,7 +30,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: [
         {
           name: 'DB_SERVER'
-            value: '${sqlServerName}.${environment().suffixes.sqlServerHostname}'
+            value: '${sqlServerName}${environment().suffixes.sqlServerHostname}'
         }
         {
           name: 'DB_NAME'
@@ -51,6 +51,18 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
       minTlsVersion:'1.2'
       http20Enabled: true
     }
+  }
+}
+
+resource appServiceSourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
+  parent: appService
+  name: 'web'
+  properties: {
+    repoUrl: 'https://github.com/cap273/expenses-app'
+    branch: 'main'
+    isManualIntegration: false
+    isMercurial: false
+    deploymentRollbackEnabled: false
   }
 }
 
