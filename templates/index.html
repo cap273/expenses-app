@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expenses App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-container">
+            <div class="nav-title">Expenses App</div>
+            <div class="nav-logo">[Logo]</div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="left-section"></div>
+        <div class="middle-section">
+            <div class="container">
+                <form id="expensesForm" action="/submit" method="post">
+                    <table id="inputTable">
+                        <tr>
+                            <th>Day</th>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th>Amount</th>
+                            <th>Expense Category</th>
+                            <th>Additional Notes</th>
+                        </tr>
+                        <tr>
+                            <td><input type="text" name="day[]"></td>
+                            <td><input type="text" name="month[]"></td>
+                            <td><input type="text" name="year[]"></td>
+                            <td><input type="text" name="amount[]"></td>
+                            <td><input type="text" name="category[]"></td>
+                            <td><input type="text" name="notes[]"></td>
+                        </tr>
+                    </table>
+                    <button type="button" id="addRowBtn">Add Row</button>
+                    <button type="button" id="deleteRowBtn">Delete Last Row</button>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+        <div class="right-section"></div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

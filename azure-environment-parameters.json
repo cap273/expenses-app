@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "expensesappdev"
+    },
+    "appServicePlanName": {
+      "value": "carlosappserviceplan01"
+    },
+    "sqlServerName": {
+      "value": "carlosexpensesdbserverdev"
+    },
+    "sqlDatabaseName": {
+      "value": "expensesdbdev"
+    },
+    "sqlAdministratorLogin": {
+      "value": "charliebrown"
+    },
+    "allowedIpAddress": {
+      "value": "104.244.240.161"
+    }
+  }
+}

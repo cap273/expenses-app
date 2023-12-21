@@ -1,0 +1,70 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: orange;
+    padding: 10px 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    width: 80%; /* Match the width of the form container */
+}
+
+.nav-title {
+    font-weight: bold;
+}
+
+.main-container {
+    display: flex;
+    flex-grow: 1;
+}
+
+.left-section, .right-section {
+    flex-grow: 1;
+    background-color: #f0f0f0; /* For visibility */
+}
+
+.middle-section {
+    flex-basis: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff; /* For visibility */
+    padding: 0 10px; /* Add padding to the middle section */
+}
+
+.container {
+    width: 100%; /* Make container use full width of the middle section */
+    max-width: 100%; /* Ensure container doesn't exceed middle section */
+    margin: 0 auto;
+    text-align: center;
+    overflow-x: auto; /* Adds horizontal scrolling if the table is too wide */
+}
+
+table {
+    width: 100%; /* Table takes full width of the container */
+    max-width: 100%; /* Ensure table doesn't exceed container */
+    margin-top: 20px;
+    border-collapse: collapse;
+    table-layout: auto; /* Allows table to be responsive */
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+button {
+    margin-top: 10px;
+}
