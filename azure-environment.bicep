@@ -1,6 +1,7 @@
 param location string = resourceGroup().location
 param appName string
 param appServicePlanName string
+param flaskEnvironment string
 param sqlServerName string
 param sqlDatabaseName string
 param sqlAdministratorLogin string
@@ -44,6 +45,10 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
           name: 'DB_PASSWORD'
           value: sqlAdministratorPassword
         }
+        {
+          name: 'FLASK_ENV'
+          value: flaskEnvironment
+        }
       ]
       linuxFxVersion: 'Python|3.12'
       alwaysOn: false
@@ -52,6 +57,9 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
       http20Enabled: true
     }
   }
+  dependsOn: [
+    sqlDatabase
+  ]
 }
 
 resource appServiceSourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
@@ -92,5 +100,15 @@ resource sqlFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview
   properties: {
     startIpAddress: allowedIpAddress
     endIpAddress: allowedIpAddress
+  }
+}
+
+// Firewall rule resource for Azure services
+resource sqlAzureServicesFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
+  parent: sqlServer
+  name: 'AllowAzureServices'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
   }
 }

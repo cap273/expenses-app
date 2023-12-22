@@ -8,6 +8,9 @@
     "appServicePlanName": {
       "value": "carlosappserviceplan01"
     },
+    "flaskEnvironment": {
+      "value": "development"
+    },
     "sqlServerName": {
       "value": "carlosexpensesdbserverdev"
     },
