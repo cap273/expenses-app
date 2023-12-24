@@ -1,5 +1,15 @@
 from flask import Flask, request, render_template, redirect, url_for
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Date
+import pyodbc
+from sqlalchemy import (
+    create_engine,
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    String,
+    Float,
+    Date,
+)
 from sqlalchemy.exc import SQLAlchemyError
 import os
 from dotenv import load_dotenv
@@ -27,14 +37,32 @@ if FLASK_ENV == "development":
 else:
     logging.basicConfig(level=logging.WARNING)
 
-# Database URL using environment variables
-DATABASE_URL = f"mssql+pyodbc://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server"
+
+def get_database_url():
+    drivers = [driver for driver in pyodbc.drivers()]
+    driver = None
+
+    if "ODBC Driver 18 for SQL Server" in drivers:
+        driver = "ODBC Driver 18 for SQL Server"
+    elif "ODBC Driver 17 for SQL Server" in drivers:
+        driver = "ODBC Driver 17 for SQL Server"
+    else:
+        raise Exception("Suitable ODBC driver not found")
+
+    # Database URL using environment variables. Using ODBC Driver 17 for SQL Server
+    return f"mssql+pyodbc://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}?driver={driver}"
+
+
+DATABASE_URL = get_database_url()
+
+if FLASK_ENV == "development":
+    print("Database URL: ", DATABASE_URL)
 
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
 
-# Define the table
-inputs_table = Table(
+# Define the expenses table
+expenses_table = Table(
     "expenses",
     metadata,
     Column("ExpenseID", Integer, primary_key=True),
@@ -93,11 +121,12 @@ CATEGORY_LIST = [
     "Mortgage P and I",
     "Home Services",
     "Capital Improvements",
-    "Landlord Expenses"
-    ]
+    "Landlord Expenses",
+]
 
 metadata.create_all(engine)  # Create the tables if they don't exist
 populate_categories_table(engine, categories_table, CATEGORY_LIST)
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -123,32 +152,39 @@ def submit():
     try:
         with engine.connect() as conn:
             for day, month, year, amount, category, notes in rows:
-                
                 try:
-                    expense_date = datetime.strptime(f"{year}-{month}-{day}", "%Y-%B-%d").date()
+                    expense_date = datetime.strptime(
+                        f"{year}-{month}-{day}", "%Y-%B-%d"
+                    ).date()
+
+                    conn.execute(
+                        expenses_table.insert().values(
+                            Day=day,
+                            Month=month,
+                            Year=year,
+                            ExpenseDate=expense_date,
+                            Amount=float(
+                                amount.replace(",", "")
+                            ),  # Ensure no commas in submission from thousands separator
+                            ExpenseCategory=category,
+                            AdditionalNotes=notes,
+                            CreateDate=today,
+                            LastUpdated=today,
+                        )
+                    )
+
                 except ValueError:
                     # Handle invalid date
                     print("Invalid date:", day, month, year)
                     continue  # TODO: Handle this invalid date. For now, skip it.
 
-                conn.execute(
-                    inputs_table.insert().values(
-                        Day=day,
-                        Month=month,
-                        Year=year,
-                        ExpenseDate=expense_date,
-                        Amount=float(amount.replace(',','')), # Ensure no commas in submission
-                        ExpenseCategory=category,
-                        AdditionalNotes=notes,
-                        CreateDate=today,
-                        LastUpdated=today
-                    )
-                )
             conn.commit()
+
     except SQLAlchemyError as e:
         print("Error occurred:", e)
 
     return redirect(url_for("index"))
+
 
 # -------------------------------- Main Execution ------------------------------
 
