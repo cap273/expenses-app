@@ -66,16 +66,20 @@ expenses_table = Table(
     "expenses",
     metadata,
     Column("ExpenseID", Integer, primary_key=True),
-    Column("Day", Integer),
-    Column("Month", String(50)),
-    Column("Year", Integer),
-    Column("ExpenseDate", Date),
-    Column("Amount", Float),
-    Column("ExpenseCategory", String(255)),
+    Column("Day", Integer, nullable=False),
+    Column("Month", String(50), nullable=False),
+    Column("Year", Integer, nullable=False),
+    Column("ExpenseDate", Date, nullable=False),
+    Column("Amount", Float, nullable=False),
+    Column("ExpenseCategory", String(255), nullable=False),
     Column("AdditionalNotes", String(255)),
     Column("CreateDate", Date),
     Column("LastUpdated", Date),
-    extend_existing=True,
+    extend_existing=False,
+    # Set implicit_returning to False so that
+    # SQLAlchemy won't try to use the OUTPUT clause to fetch the inserted ID,
+    # which should resolve any conflicts with existing database triggers.
+    implicit_returning=False,
 )
 
 # Define the categories table
@@ -83,8 +87,10 @@ categories_table = Table(
     "categories",
     metadata,
     Column("CategoryID", Integer, primary_key=True),
-    Column("CategoryName", String(255), unique=True),
-    extend_existing=True,
+    Column("CategoryName", String(255), unique=True, nullable=False),
+    Column("CreateDate", Date),
+    Column("LastUpdated", Date),
+    extend_existing=False,
 )
 
 # Define list of categories
@@ -124,7 +130,7 @@ CATEGORY_LIST = [
     "Landlord Expenses",
 ]
 
-metadata.create_all(engine)  # Create the tables if they don't exist
+# metadata.create_all(engine)  # Create the tables if they don't exist
 populate_categories_table(engine, categories_table, CATEGORY_LIST)
 
 
@@ -137,7 +143,6 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit():
     form_data = request.form
-    today = date.today()
 
     # Process the form data
     rows = zip(
@@ -168,8 +173,6 @@ def submit():
                             ),  # Ensure no commas in submission from thousands separator
                             ExpenseCategory=category,
                             AdditionalNotes=notes,
-                            CreateDate=today,
-                            LastUpdated=today,
                         )
                     )
 

@@ -24,7 +24,7 @@ addRowBtn.addEventListener('click', function() {
         '<option value="December"' + (lastMonth === 'December' ? ' selected' : '') + '>December</option>' +
         '</select>';
     var yearInput = '<input type="number" name="year[]" min="2000" max="2050" required value="' + lastYear + '">';
-    var amountInput = '<input type="text" name="amount[]" title="Please enter a valid amount with up to two decimal places. Example: 1,234.56" required>';
+    var amountInput = '<div class="amount-input-wrapper"><input type="text" name="amount[]" title="Please enter a valid amount with up to two decimal places. Example: 1,234.56" required></div>';
     var categorySelect = lastRow.cells[4].innerHTML; // Copy the Category dropdown
     var notesInput = '<input type="text" name="notes[]">';
 

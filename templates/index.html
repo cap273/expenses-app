@@ -61,8 +61,10 @@
                         </td>
                         <td><input type="number" name="year[]" min="2000" max="2100" required></td>
                         <td>
-                            <input type="text" name="amount[]" title="Please enter a nonnegative number with up to two decimal places. Examples: 1,234, 12,345.67" required>
-                        </td>                        
+                            <div class="amount-input-wrapper">
+                                <input type="text" name="amount[]" title="Please enter a nonnegative number with up to two decimal places. Examples: 1,234, 12,345.67" required>
+                            </div>
+                        </td>                      
                         <td>
                             <select name="category[]" required>
                                 <option value="" selected disabled hidden></option>

@@ -113,21 +113,25 @@ th:nth-child(6), td:nth-child(6) {
     width: 30%; /* Adjust as necessary */
 }
 
-input[name^="amount"] {
+.amount-input-wrapper {
     position: relative;
-    padding-left: 20px; /* Make space for the dollar sign */
+    display: inline-block;
 }
 
-input[name^="amount"]::before {
+.amount-input-wrapper::before {
     content: '$';
     position: absolute;
-    left: 5px; /* Adjust as needed */
+    left: 5px;
     top: 50%;
     transform: translateY(-50%);
     color: gray;
     pointer-events: none;
-    font-size: 1em; /* Adjust size if necessary */
-    z-index: 1; /* Ensure it's above other elements */
+    font-size: 1em;
+    z-index: 1;
+}
+
+input[name^="amount"] {
+    padding-left: 20px; /* Make space for the dollar sign */
 }
 
 button {
