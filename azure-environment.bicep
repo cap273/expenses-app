@@ -17,6 +17,7 @@ var createExpensesTableScript = '''
     Month NVARCHAR(50) NOT NULL,
     Year INT NOT NULL,
     ExpenseDate DATE NOT NULL,
+    ExpenseDayOfWeek NVARCHAR(50),
     Amount FLOAT NOT NULL,
     ExpenseCategory NVARCHAR(255) NOT NULL,
     AdditionalNotes NVARCHAR(255),
