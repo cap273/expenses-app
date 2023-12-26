@@ -88,6 +88,18 @@ var createTriggersForDateTrackingScript = '''
       INNER JOIN inserted i ON categories.CategoryID = i.CategoryID
   END;
   GO
+
+  CREATE TRIGGER trg_expenses_insert_dayofweek
+  ON expenses
+  AFTER INSERT
+  AS
+  BEGIN
+      UPDATE e
+      SET e.ExpenseDayOfWeek = DATENAME(dw, i.ExpenseDate)
+      FROM expenses e
+      INNER JOIN inserted i ON e.ExpenseID = i.ExpenseID
+  END;
+  GO
 '''
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {

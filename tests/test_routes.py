@@ -2,11 +2,11 @@ import sys
 import os
 from datetime import datetime
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import pytest
 from flask import url_for
 from app import app
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 @pytest.fixture
@@ -19,9 +19,7 @@ def client():
 def test_index(client):
     response = client.get(url_for("index"))
     assert response.status_code == 200
-    assert (
-        b"Expenses App" in response.data
-    )  # replace "Welcome" with actual content you expect
+    assert b"Expenses App" in response.data
 
 
 def test_submit_expense(client):
@@ -70,7 +68,6 @@ def test_submit_valid_expense(client):
             "category": "Groceries",
             "notes": "",
         },  # Invalid month
-        # ... other invalid cases
     ],
 )
 def test_submit_invalid_expense(client, invalid_data):

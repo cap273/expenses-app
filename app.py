@@ -70,6 +70,7 @@ expenses_table = Table(
     Column("Month", String(50), nullable=False),
     Column("Year", Integer, nullable=False),
     Column("ExpenseDate", Date, nullable=False),
+    Column("ExpenseDayOfWeek", String(50)),
     Column("Amount", Float, nullable=False),
     Column("ExpenseCategory", String(255), nullable=False),
     Column("AdditionalNotes", String(255)),
