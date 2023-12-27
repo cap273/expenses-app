@@ -13,16 +13,26 @@ param sqlAdministratorPassword string
 var createExpensesTableScript = '''
   CREATE TABLE expenses (
     ExpenseID INT PRIMARY KEY IDENTITY,
+    AccountID INT NOT NULL, -- User account ID that created this expense
+    ResponsibleEntity NVARCHAR(255), -- Either 'Joint' or the name of the responsible individual
+    PersonID INT, -- Foreign key to the persons table, NULL if it's a joint expense
     Day INT NOT NULL,
     Month NVARCHAR(50) NOT NULL,
     Year INT NOT NULL,
     ExpenseDate DATE NOT NULL,
     ExpenseDayOfWeek NVARCHAR(50),
-    Amount FLOAT NOT NULL,
+    Amount FLOAT NOT NULL, -- Original unadjusted amount
+    AdjustedAmount FLOAT, -- Amount after adjustments like reimbursements
     ExpenseCategory NVARCHAR(255) NOT NULL,
     AdditionalNotes NVARCHAR(255),
     CreateDate DATE,
-    LastUpdated DATE
+    LastUpdated DATE,
+    Currency NVARCHAR(50), -- Currency of the transaction
+    ManualCategory NVARCHAR(255), -- Category as manually set by the user
+    SuggestedCategory NVARCHAR(255), -- Category suggested by the ML model
+    CategoryConfirmed BIT, -- Indicates if the user confirmed the ML-suggested category
+    FOREIGN KEY (AccountID) REFERENCES accounts(AccountID),
+    FOREIGN KEY (PersonID) REFERENCES persons(PersonID)
   );
 '''
 
@@ -32,6 +42,26 @@ var createCategoriesTableScript = '''
     CategoryName NVARCHAR(255) UNIQUE NOT NULL,
     CreateDate DATE,
     LastUpdated DATE
+  );
+'''
+
+var createAccountsTableScript = '''
+  CREATE TABLE accounts (
+    AccountID INT PRIMARY KEY IDENTITY,
+    AccountName NVARCHAR(255) NOT NULL,
+    CreateDate DATE,
+    LastUpdated DATE
+  );
+'''
+
+var createPersonsTableScript = '''
+  CREATE TABLE persons (
+    PersonID INT PRIMARY KEY IDENTITY,
+    AccountID INT NOT NULL, -- Link to the Account table
+    PersonName NVARCHAR(255) NOT NULL,
+    CreateDate DATE,
+    LastUpdated DATE,
+    FOREIGN KEY (AccountID) REFERENCES accounts(AccountID) -- Foreign key to ensure referential integrity
   );
 '''
 
@@ -99,6 +129,60 @@ var createTriggersForDateTrackingScript = '''
       SET e.ExpenseDayOfWeek = DATENAME(dw, i.ExpenseDate)
       FROM expenses e
       INNER JOIN inserted i ON e.ExpenseID = i.ExpenseID
+  END;
+  GO
+
+  -- Trigger for the 'accounts' table for new records
+  CREATE TRIGGER trg_accounts_insert
+  ON accounts
+  AFTER INSERT
+  AS
+  BEGIN
+      UPDATE accounts
+      SET CreateDate = CAST(GETDATE() AS DATE),
+          LastUpdated = CAST(GETDATE() AS DATE)
+      FROM accounts
+      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
+  END;
+  GO
+
+  -- Trigger for the 'accounts' table for updates
+  CREATE TRIGGER trg_accounts_update
+  ON accounts
+  AFTER UPDATE
+  AS
+  BEGIN
+      UPDATE accounts
+      SET LastUpdated = CAST(GETDATE() AS DATE)
+      FROM accounts
+      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
+  END;
+  GO
+
+  -- Trigger for the 'persons' table for new records
+  CREATE TRIGGER trg_persons_insert
+  ON persons
+  AFTER INSERT
+  AS
+  BEGIN
+      UPDATE persons
+      SET CreateDate = CAST(GETDATE() AS DATE),
+          LastUpdated = CAST(GETDATE() AS DATE)
+      FROM persons
+      INNER JOIN inserted i ON persons.PersonID = i.PersonID
+  END;
+  GO
+
+  -- Trigger for the 'persons' table for updates
+  CREATE TRIGGER trg_persons_update
+  ON persons
+  AFTER UPDATE
+  AS
+  BEGIN
+      UPDATE persons
+      SET LastUpdated = CAST(GETDATE() AS DATE)
+      FROM persons
+      INNER JOIN inserted i ON persons.PersonID = i.PersonID
   END;
   GO
 '''
@@ -200,8 +284,11 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
       Import-Module SqlServer
 
       # PowerShell script to run the SQL scripts directly using environment variables
-      Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createExpensesTableScript
+      # Order of execution (due to foreign key constraints: createCategoriesTableScript, createAccountsTableScript, createPersonsTableScript, createExpensesTableScript)
       Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createCategoriesTableScript
+      Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createAccountsTableScript
+      Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createPersonsTableScript
+      Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createExpensesTableScript
       Invoke-Sqlcmd -ServerInstance $env:sqlServerName -Database $env:sqlDatabaseName -Username $env:sqlAdminUsername -Password $env:sqlAdminPassword -Query $env:createTriggersForDateTrackingScript
     '''
     timeout: 'PT1H'
@@ -230,6 +317,14 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
       {
         name: 'createCategoriesTableScript'
         secureValue: createCategoriesTableScript
+      }
+      {
+        name: 'createAccountsTableScript'
+        secureValue: createAccountsTableScript
+      }
+      {
+        name: 'createPersonsTableScript'
+        secureValue: createPersonsTableScript
       }
       {
         name: 'createTriggersForDateTrackingScript'

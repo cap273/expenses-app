@@ -9,6 +9,8 @@ from sqlalchemy import (
     String,
     Float,
     Date,
+    Boolean,
+    ForeignKey,
 )
 from sqlalchemy.exc import SQLAlchemyError
 import os
@@ -66,20 +68,28 @@ expenses_table = Table(
     "expenses",
     metadata,
     Column("ExpenseID", Integer, primary_key=True),
+    Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
+    Column("ResponsibleEntity", String(255)),  # Either 'Joint' or the name of an individual
+    Column("PersonID", Integer, ForeignKey("persons.PersonID"), nullable=True), # NULL if it's a joint expense
     Column("Day", Integer, nullable=False),
     Column("Month", String(50), nullable=False),
     Column("Year", Integer, nullable=False),
     Column("ExpenseDate", Date, nullable=False),
     Column("ExpenseDayOfWeek", String(50)),
     Column("Amount", Float, nullable=False),
+    Column("AdjustedAmount", Float),  # Amount after adjustments
     Column("ExpenseCategory", String(255), nullable=False),
     Column("AdditionalNotes", String(255)),
     Column("CreateDate", Date),
     Column("LastUpdated", Date),
+    Column("Currency", String(50)),
+    Column("ManualCategory", String(255)),
+    Column("SuggestedCategory", String(255)),
+    Column("CategoryConfirmed", Boolean),
     extend_existing=False,
     # Set implicit_returning to False so that
-    # SQLAlchemy won't try to use the OUTPUT clause to fetch the inserted ID,
-    # which should resolve any conflicts with existing database triggers.
+    # SQLAlchemy won't try to use the OUTPUT clause to fetch the inserted ID.
+    # This should avoid conflicts with database triggers for ID generation
     implicit_returning=False,
 )
 
@@ -130,6 +140,30 @@ CATEGORY_LIST = [
     "Capital Improvements",
     "Landlord Expenses",
 ]
+
+# Define the accounts table
+accounts_table = Table(
+    "accounts",
+    metadata,
+    Column("AccountID", Integer, primary_key=True),
+    Column("AccountName", String(255), nullable=False),
+    Column("CreateDate", Date),
+    Column("LastUpdated", Date),
+    extend_existing=True,
+)
+
+# Define the persons table
+persons_table = Table(
+    "persons",
+    metadata,
+    Column("PersonID", Integer, primary_key=True),
+    Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
+    Column("PersonName", String(255), nullable=False),
+    Column("CreateDate", Date),
+    Column("LastUpdated", Date),
+    extend_existing=True,
+)
+
 
 # metadata.create_all(engine)  # Create the tables if they don't exist
 populate_categories_table(engine, categories_table, CATEGORY_LIST)

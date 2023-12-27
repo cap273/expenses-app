@@ -57,7 +57,7 @@ body {
 }
 
 .middle-section {
-    flex-basis: 60%;
+    flex-basis: 70%; /* Initial width for larger screens */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -102,15 +102,49 @@ th, td {
     text-align: left;
 }
 
-/* For Day, Year, and Amount columns */
-th:nth-child(1), th:nth-child(3), th:nth-child(4),
-td:nth-child(1), td:nth-child(3), td:nth-child(4) {
-    width: 10%; /* Adjust as necessary */
+/* Fixed table layout */
+#expensesForm table {
+    table-layout: fixed; /* Ensures that column widths are respected */
+    width: 100%;
 }
 
-/* For Additional Notes column */
-th:nth-child(6), td:nth-child(6) {
-    width: 30%; /* Adjust as necessary */
+/* Column widths applied to both headers and data cells */
+#expensesForm table th, #expensesForm table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+    font-size: 1em;
+}
+
+/* Adjusting specific column widths with more specific selectors for column widths */
+#expensesForm table th:nth-child(1), #expensesForm table td:nth-child(1) { /* Day column */
+    width: 7%;
+}
+
+#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(2) { /* Month column */
+    width: 13%;
+}
+
+#expensesForm table th:nth-child(3), #expensesForm table td:nth-child(3) { /* Year column */
+    width: 10%;
+}
+
+#expensesForm table th:nth-child(4), #expensesForm table td:nth-child(4) { /* Amount column */
+    width: 10%;
+}
+
+#expensesForm table th:nth-child(5), #expensesForm table td:nth-child(5) { /* Expense Category column */
+    width: 30%;
+}
+
+#expensesForm table th:nth-child(6), #expensesForm table td:nth-child(6) { /* Additional Notes column */
+    width: auto; /* Takes up remaining space */
+}
+
+/* Ensure input and select elements fit within table cells */
+#expensesForm table input, #expensesForm table select {
+    width: 100%; /* Make input and select elements fill the cell */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .amount-input-wrapper {
@@ -143,8 +177,13 @@ button {
     position: absolute;
     background-color: #f9f9f9;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Optional: for better visibility */
+    z-index: 1; /* To make sure it appears above other elements */
+    font-family: Arial, sans-serif;
+    font-size: 1em;
+    top: 100%; /* Start right below the parent element */
+    left: 0;
+    background-color: white; /* Or any desired background color */
 }
 
 .dropdown-menu a {
@@ -163,4 +202,90 @@ button {
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+/* Media Query for Medium Screens */
+@media screen and (max-width: 1024px) {
+    .middle-section {
+        flex-basis: 80%; /* Increased width on medium screens */
+    }
+
+    #expensesForm table th {
+        font-size: 0.9em; /* Slightly smaller font size for medium screens */
+    }
+}
+
+/* Media Query for Mobile Screens */
+@media screen and (max-width: 768px) {
+    /* Navigation Bar Items */
+    .navbar {
+        padding: 20px 0;
+    }
+    .nav-link, .nav-title, .username {
+        font-size: 1.2em; /* Larger font size for better visibility */
+    }
+
+    /* Buttons for Mobile Screens */
+    .button-container button {
+        padding: 15px 30px; /* Larger buttons for easier touch interaction */
+        font-size: 1.2em; /* Larger font size for readability */
+    }
+
+    /* Table Adjustments */
+    .main-container {
+        flex-direction: column; /* Stack elements vertically */
+    }
+    .left-section, .right-section {
+        display: none; /* Hide side sections to give more space to the table */
+    }
+    .middle-section {
+        flex-basis: 100%; /* Table takes full width */
+    }
+
+    /* General Mobile Responsiveness */
+    body {
+        font-size: 1.1em; /* Increase the base font size for better readability */
+    }
+
+    /* Adjust navbar and main container widths */
+    .nav-container, .main-container {
+        width: 95%; /* Increase width for small screens */
+    }
+
+    /* Table adjustments for mobile screens */
+    th, td {
+        padding: 4px; /* Smaller padding for compact display */
+    }
+
+    /* Ensure the table is fully visible and horizontally scrollable on small screens */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .middle-section {
+        flex-basis: 90%; /* Further increased width on small screens */
+    }
+
+    #expensesForm table th {
+        font-size: 0.8em; /* Even smaller font size for small screens */
+    }
+}
+
+/* Additional Media Query for Very Small Screens */
+@media screen and (max-width: 480px) {
+    /* Further table adjustments for very small screens */
+    th, td {
+        font-size: 0.9em; /* Smaller font size for better fit */
+    }
+
+    .middle-section {
+        flex-basis: 100%; /* Maximum width on very small screens */
+    }
+    .left-section, .right-section {
+        display: none; /* Optionally hide side sections to give more space */
+    }
+
+    #expensesForm table th {
+        font-size: 0.7em; /* Smallest font size for very small screens */
+    }
 }
