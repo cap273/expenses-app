@@ -19,6 +19,7 @@ import logging
 from datetime import datetime, date
 
 from utils.db import populate_categories_table, get_categories
+from utils.session import get_current_currency, get_current_user_account_id
 
 app = Flask(__name__)
 
@@ -172,12 +173,15 @@ populate_categories_table(engine, categories_table, CATEGORY_LIST)
 @app.route("/", methods=["GET"])
 def index():
     categories = get_categories(engine, categories_table)
-    return render_template("index.html", categories=categories)
+    current_currency = get_current_currency()
+
+    return render_template("index.html", categories=categories, currency=current_currency)
 
 
 @app.route("/submit", methods=["POST"])
 def submit():
     form_data = request.form
+    current_user_account_id = get_current_user_account_id()
 
     # Process the form data
     rows = zip(
@@ -199,6 +203,7 @@ def submit():
 
                     conn.execute(
                         expenses_table.insert().values(
+                            AccountID=current_user_account_id,
                             Day=day,
                             Month=month,
                             Year=year,
