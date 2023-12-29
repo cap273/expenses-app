@@ -9,34 +9,6 @@ body {
     padding: 10px 0;
 }
 
-/* Styles for nav-container and main-container */
-.nav-container, .main-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 auto;
-    width: 80%; /* Consistent width */
-}
-
-/* Styles for sections in nav-container */
-.nav-left-section, .nav-middle-section, .nav-right-section {
-    flex: 1; /* Equal distribution */
-    display: flex;
-    padding: 0 10px; /* Padding between elements */
-}
-
-.nav-left-section {
-    justify-content: flex-end; /* Right-align content in left section */
-}
-
-.nav-middle-section {
-    justify-content: flex-start; /* Center-align content in middle section */
-}
-
-.nav-right-section {
-    justify-content: flex-start; /* Left-align content in right section */
-}
-
 .nav-link {
     margin-right: 20px; /* Adds padding between the links */
     cursor: pointer;
@@ -44,25 +16,6 @@ body {
 
 .nav-title {
     font-weight: bold;
-}
-
-.main-container {
-    display: flex;
-    flex-grow: 1;
-}
-
-.left-section, .right-section {
-    flex-grow: 1;
-    background-color: #f0f0f0; /* For visibility */
-}
-
-.middle-section {
-    flex-basis: 70%; /* Initial width for larger screens */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff; /* For visibility */
-    padding: 0 10px; /* Add padding to the middle section */
 }
 
 /* Main body table form styling */
@@ -102,70 +55,8 @@ th, td {
     text-align: left;
 }
 
-/* Fixed table layout */
-#expensesForm table {
-    table-layout: fixed; /* Ensures that column widths are respected */
-    width: 100%;
-}
-
-/* Column widths applied to both headers and data cells */
-#expensesForm table th, #expensesForm table td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
-    font-size: 1em;
-}
-
-/* Adjusting specific column widths with more specific selectors for column widths */
-#expensesForm table th:nth-child(1), #expensesForm table td:nth-child(1) { /* Day column */
-    width: 7%;
-}
-
-#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(2) { /* Month column */
-    width: 13%;
-}
-
-#expensesForm table th:nth-child(3), #expensesForm table td:nth-child(3) { /* Year column */
-    width: 10%;
-}
-
-#expensesForm table th:nth-child(4), #expensesForm table td:nth-child(4) { /* Amount column */
-    width: 10%;
-}
-
-#expensesForm table th:nth-child(5), #expensesForm table td:nth-child(5) { /* Expense Category column */
-    width: 30%;
-}
-
-#expensesForm table th:nth-child(6), #expensesForm table td:nth-child(6) { /* Additional Notes column */
-    width: auto; /* Takes up remaining space */
-}
-
-/* Ensure input and select elements fit within table cells */
-#expensesForm table input, #expensesForm table select {
-    width: 100%; /* Make input and select elements fill the cell */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-}
-
-.amount-input-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.amount-input-wrapper::before {
-    content: '$';
-    position: absolute;
-    left: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: gray;
-    pointer-events: none;
-    font-size: 1em;
-    z-index: 1;
-}
-
-input[name^="amount"] {
-    padding-left: 20px; /* Make space for the dollar sign */
+thead {
+    background-color: #f0f0f0;
 }
 
 button {
@@ -204,124 +95,26 @@ button {
     cursor: pointer;
 }
 
-/* Media Query for Medium Screens */
-@media screen and (max-width: 1024px) {
-    .middle-section {
-        flex-basis: 80%; /* Increased width on medium screens */
-    }
-
-    #expensesForm table th {
-        font-size: 0.9em; /* Slightly smaller font size for medium screens */
-    }
+.inform-profile-btn {
+    width: auto;
+    padding: 10px;
+    background-color: orange;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-/* Media Query for Mobile Screens */
-@media screen and (max-width: 768px) {
-    /* Navigation Bar Items */
-    .navbar {
-        padding: 20px 0;
-    }
-    .nav-link, .nav-title, .username {
-        font-size: 1.2em; /* Larger font size for better visibility */
-    }
-
-    /* Buttons for Mobile Screens */
-    .button-container button {
-        padding: 15px 30px; /* Larger buttons for easier touch interaction */
-        font-size: 1.2em; /* Larger font size for readability */
-    }
-
-    /* Table Adjustments */
-    .main-container {
-        flex-direction: column; /* Stack elements vertically */
-    }
-    .left-section, .right-section {
-        display: none; /* Hide side sections to give more space to the table */
-    }
-    .middle-section {
-        flex-basis: 100%; /* Table takes full width */
-    }
-
-    /* General Mobile Responsiveness */
-    body {
-        font-size: 1.1em; /* Increase the base font size for better readability */
-    }
-
-    /* Adjust navbar and main container widths */
-    .nav-container, .main-container {
-        width: 95%; /* Increase width for small screens */
-    }
-
-    /* Table adjustments for mobile screens */
-    th, td {
-        padding: 4px; /* Smaller padding for compact display */
-    }
-
-    /* Ensure the table is fully visible and horizontally scrollable on small screens */
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .middle-section {
-        flex-basis: 90%; /* Further increased width on small screens */
-    }
-
-    #expensesForm table th {
-        font-size: 0.8em; /* Even smaller font size for small screens */
-    }
+.inform-profile-btn:hover {
+    background-color: darkorange;
 }
 
-/* Additional Media Query for Very Small Screens */
-@media screen and (max-width: 480px) {
-    /* Further table adjustments for very small screens */
-    th, td {
-        font-size: 0.9em; /* Smaller font size for better fit */
-    }
-
-    .middle-section {
-        flex-basis: 100%; /* Maximum width on very small screens */
-    }
-    .left-section, .right-section {
-        display: none; /* Optionally hide side sections to give more space */
-    }
-
-    #expensesForm table th {
-        font-size: 0.7em; /* Smallest font size for very small screens */
-    }
-}
-
-.login-container, .account-creation-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; /* Ensure items are stacked vertically */
-    height: 80vh; /* Adjust height as needed */
-}
-
-.login-form, .account-creation-form {
-    width: 300px;
-    padding: 20px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2); /* Adds subtle shadow */
-    border-radius: 5px; /* Rounded corners */
-    background-color: #ffffff; /* White background */
-    text-align: center;
+.user-details {
+    margin-bottom: 20px;
 }
 
 .login-form h2, .account-creation-form h2 {
     text-align: center;
-}
-
-.login-form input[type="text"],
-.login-form input[type="password"],
-.account-creation-form input[type="text"],
-.account-creation-form input[type="email"],
-.account-creation-form input[type="password"] {
-    width: calc(100% - 20px); /* Adjust width to account for padding */
-    padding: 10px; /* Add padding for spacing */
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .login-form button, .account-creation-form button {
@@ -363,4 +156,46 @@ button {
     color: red;
     text-align: center;
     margin-bottom: 10px; /* Add some spacing */
+}
+
+.amount-cell {
+    text-align: right; /* Right-align the amount */
+}
+
+/* Update Profile button styling */
+.update-profile-btn {
+    display: inline-flex; /* Center the button */
+    margin: 10px auto; /* Vertical margin and auto horizontal margin for centering */
+    width: auto;
+    padding: 10px;
+    background-color: #1f883d;
+    border-color: rgba(31,35,40,0.15);
+    color: #ffffff;
+    fill: rgba(255,255,255,0.8);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Section divider styling */
+.section-divider {
+    border: 0;
+    height: 1px;
+    background-color: #ccc; /* Grey color */
+    margin: 20px 0; /* Space above and below the divider */
+}
+
+/* Style for narrow horizontal separators within the form */
+.section-separator {
+    border: 0;
+    height: 0.5px; /* Narrower than section-divider */
+    background-color: #ccc;
+    margin: 20px 0;
+}
+
+.note {
+    min-height: 17px;
+  margin: 4px 0 2px;
+  font-size: 12px;
+  color: #656d76;
 }

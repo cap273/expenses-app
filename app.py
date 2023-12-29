@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, redirect, url_for
-from sqlalchemy import create_engine, update
+from sqlalchemy import create_engine, select, update
 from sqlalchemy.exc import SQLAlchemyError
 import os
 from dotenv import load_dotenv
 import logging
-from datetime import datetime, date
+from datetime import datetime
 from flask_login import (
     LoginManager,
     login_required,
@@ -14,12 +14,11 @@ from flask_login import (
 from urllib.parse import urlparse
 
 from utils.db_tools import populate_categories_table, get_categories, get_database_url
-from utils.session import get_current_currency, login_and_update_last_login
-from database.models import db, Account
+from utils.session import login_and_update_last_login
+from database.models import db, Account, Person
 from database.tables import (
     expenses_table,
     categories_table,
-    persons_table,
     CATEGORY_LIST,
 )
 
@@ -43,9 +42,11 @@ else:
 DATABASE_URL = get_database_url(DB_USERNAME, DB_PASSWORD, DB_SERVER, DB_NAME)
 
 app = Flask(__name__)
+
 app.secret_key = os.environ.get(
     "FLASK_SECRET_KEY"
 )  # Set the secret key to use for Flask sessions
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Configure session cookies
 
 # Using the ORM operations of Flask-SQLAlchemy to utilize
 # Flask extensions like Flask-Login
@@ -64,10 +65,10 @@ if FLASK_ENV == "development":
     print("Database URL: ", DATABASE_URL)
 
 
-# user_loader callback
 @login_manager.user_loader
 def load_user(user_id):
-    return Account.query.get(int(user_id))
+    with db.session.begin():
+        return db.session.get(Account, int(user_id))
 
 
 # metadata.create_all(engine)  # Create the tables if they don't exist
@@ -122,13 +123,25 @@ def create_account():
                 error_message = "Email address already exists."
             else:
                 # Create new user instance
-                new_user = Account(account_name=username, user_email=email)
+                new_user = Account(
+                    account_name=username,
+                    user_email=email,
+                    display_name=username,
+                    currency='USD', # Default to USD
+                )
 
                 # Set password (this will hash the password)
                 new_user.set_password(password)
 
                 # Add new user to database
                 db.session.add(new_user)
+                db.session.commit()
+
+                # Create a new Person instance associated with this account
+                new_person = Person(AccountID=new_user.id, PersonName=username)
+
+                # Add new person to database
+                db.session.add(new_person)
                 db.session.commit()
 
                 # Authenticate and login the new user
@@ -147,21 +160,20 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
+
 # Main page view
 @app.route("/", methods=["GET"])
 @login_required
 def index():
     categories = get_categories(engine, categories_table)
-    current_currency = get_current_currency()
 
-    # Get the username of the logged-in user
-    username = current_user.account_name
+    # Fetch persons associated with the current user's account
+    persons = Person.query.filter_by(AccountID=current_user.id).all()
 
     return render_template(
         "index.html",
         categories=categories,
-        currency=current_currency,
-        username=username,
+        persons=persons,
     )
 
 
@@ -173,6 +185,7 @@ def submit():
 
     # Process the form data
     rows = zip(
+        form_data.getlist("scope[]"),
         form_data.getlist("day[]"),
         form_data.getlist("month[]"),
         form_data.getlist("year[]"),
@@ -183,15 +196,21 @@ def submit():
 
     try:
         with engine.connect() as conn:
-            for day, month, year, amount, category, notes in rows:
+            for scope, day, month, year, amount, category, notes in rows:
                 try:
                     expense_date = datetime.strptime(
                         f"{year}-{month}-{day}", "%Y-%B-%d"
                     ).date()
 
+                    # Determine if the scope is joint or individual
+                    person_id = None if scope == "Joint" else scope
+                    expense_scope = "Joint" if scope == "Joint" else "Individual"
+
                     conn.execute(
                         expenses_table.insert().values(
                             AccountID=current_user_account_id,
+                            ExpenseScope=expense_scope, # Set to Joint or Individual
+                            PersonID=person_id,  # Set to None if Joint, otherwise set to PersonID
                             Day=day,
                             Month=month,
                             Year=year,
@@ -215,6 +234,81 @@ def submit():
         print("Error occurred:", e)
 
     return redirect(url_for("index"))
+
+
+@app.route("/view_expenses")
+@login_required
+def view_expenses():
+
+    # Create a SQL query to select expenses for the current user
+    query = select(
+        expenses_table.c.ExpenseDate,
+        expenses_table.c.Amount,
+        expenses_table.c.ExpenseCategory,
+        expenses_table.c.AdditionalNotes,
+    ).where(expenses_table.c.AccountID == current_user.id)
+
+    # Execute the query using SQLAlchemy Core
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        user_expenses = result.fetchall()
+
+    # Convert raw results to a list of dicts
+    expenses = [row._asdict() for row in user_expenses]
+
+    # Format the amount in each expense
+    for expense in expenses:
+        if current_user.currency == 'USD':
+            expense["Amount"] = "${:,.2f}".format(expense["Amount"])
+        elif current_user.currency == 'EUR':
+            expense["Amount"] = "€{:,.2f}".format(expense["Amount"])
+
+    return render_template("view_expenses.html", expenses=expenses)
+
+
+# -------------------------------- User Management Routes ---------------------
+
+
+@app.route("/profile")
+@login_required
+def profile():
+    # Assuming you have a relationship set up to get persons associated with the user
+    persons = Person.query.filter_by(AccountID=current_user.id).all()
+    print(persons)  # Debugging: Check if persons contain data
+    return render_template("profile.html", current_user=current_user, persons=persons)
+
+
+@app.route("/update_profile", methods=["POST"])
+@login_required
+def update_profile():
+    display_name = request.form.get("display_name")
+    new_password = request.form.get("new_password")
+
+    # Update display name
+    if display_name:
+        current_user.display_name = display_name
+
+    # Update password, if provided
+    if new_password:
+        # Hash the new password
+        current_user.set_password(new_password)
+
+    person_ids = request.form.getlist("person_ids[]")
+    person_names = request.form.getlist("person_names[]")
+
+    for person_id, person_name in zip(person_ids, person_names):
+        if person_id == 'new':
+            new_person = Person(AccountID=current_user.id, PersonName=person_name)
+            db.session.add(new_person)
+        else:
+            person = Person.query.filter_by(PersonID=person_id, AccountID=current_user.id).first()
+            if person:
+                person.PersonName = person_name
+
+    # Commit changes to the database
+    db.session.commit()
+
+    return redirect(url_for("profile"))
 
 
 # -------------------------------- Main Execution ------------------------------

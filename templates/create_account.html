@@ -2,7 +2,10 @@
 <html>
 <head>
     <title>Create Account - Expenses App</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
 </head>
 <div class="navbar">
     <div class="nav-container">
@@ -27,6 +30,6 @@
             <button type="submit">Create Account</button>
         </form>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 </body>
 </html>

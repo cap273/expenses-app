@@ -1,0 +1,220 @@
+/* Styles for nav-container and main-container */
+.nav-container, .main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items to start at the top */
+    margin: 0 auto;
+    width: 90%; /* Consistent width */
+}
+
+/* Styles for sections in nav-container */
+.nav-left-section, .nav-middle-section, .nav-right-section {
+    flex: 1; /* Equal distribution */
+    display: flex;
+    padding: 0 10px; /* Padding between elements */
+}
+
+.nav-left-section {
+    justify-content: center; /* Right-align content in left section */
+}
+
+.nav-middle-section {
+    justify-content: flex-start; /* Center-align content in middle section */
+}
+
+.nav-right-section {
+    justify-content: flex-start; /* Left-align content in right section */
+}
+
+.left-section {
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-start !important;/* Align content to the right */
+    justify-content: flex-start !important; /* Align content to the top */
+    padding: 10px;
+}
+
+.user-details-top {
+    align-self: flex-start;
+    width: 100%;
+    text-align: right;
+    padding: 10px 0;
+}
+
+.right-section {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.narrow-edge-sections {
+    flex-basis: 15%;
+}
+
+.wide-edge-sections {
+    flex-basis: 25%;
+}
+
+.wide-middle-section {
+    flex-basis: 70%; /* Initial width for larger screens */
+}
+
+.narrow-middle-section {
+    flex-basis: 50%;
+}
+
+.middle-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff; /* For visibility */
+    padding: 0 10px; /* Add padding to the middle section */
+}
+
+.login-container, .account-creation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Ensure items are stacked vertically */
+    height: 80vh; /* Adjust height as needed */
+}
+
+.login-form, .account-creation-form {
+    width: 300px;
+    padding: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2); /* Adds subtle shadow */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #ffffff; /* White background */
+    text-align: center;
+}
+
+.form-container {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-form {
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    background-color: #ffffff;
+    text-align: left; /* Align form items to the left */
+}
+
+/* Top margin for the form */
+.form-top-margin {
+    margin-top: 20px;
+}
+
+/* Remove box shadow */
+.no-box-shadow {
+    box-shadow: none;
+}
+
+/* Spacing for form headings */
+.form-heading {
+    margin-top: 20px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"],
+.account-creation-form input[type="text"],
+.account-creation-form input[type="email"],
+.account-creation-form input[type="password"]{
+    width: calc(100% - 20px); /* Adjust width to account for padding */
+    padding: 10px; /* Add padding for spacing */
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Adjust the width of certain input boxes */
+.profile-form input[type="text"], 
+.profile-form input[type="password"] {
+    width: 60%;
+    padding: 10px; /* Add padding for spacing */
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Media Query for Medium Screens */
+@media screen and (max-width: 1024px) {
+    .middle-section {
+        flex-basis: 80%; /* Increased width on medium screens */
+    }
+}
+
+/* Media Query for Mobile Screens */
+@media screen and (max-width: 768px) {
+    /* Navigation Bar Items */
+    .navbar {
+        padding: 20px 0;
+    }
+    .nav-link, .nav-title, .display_name {
+        font-size: 1.2em; /* Larger font size for better visibility */
+    }
+
+    /* Buttons for Mobile Screens */
+    .button-container button {
+        padding: 15px 30px; /* Larger buttons for easier touch interaction */
+        font-size: 1.2em; /* Larger font size for readability */
+    }
+
+    /* Table Adjustments */
+    .main-container {
+        flex-direction: column; /* Stack elements vertically */
+    }
+    .left-section, .right-section {
+        display: none; /* Hide side sections to give more space to the table */
+    }
+    .middle-section {
+        flex-basis: 100%; /* Table takes full width */
+    }
+
+    /* General Mobile Responsiveness */
+    body {
+        font-size: 1.1em; /* Increase the base font size for better readability */
+    }
+
+    /* Adjust navbar and main container widths */
+    .nav-container, .main-container {
+        width: 95%; /* Increase width for small screens */
+    }
+
+    /* Table adjustments for mobile screens */
+    th, td {
+        padding: 4px; /* Smaller padding for compact display */
+    }
+
+    /* Ensure the table is fully visible and horizontally scrollable on small screens */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .middle-section {
+        flex-basis: 90%; /* Further increased width on small screens */
+    }
+}
+
+/* Additional Media Query for Very Small Screens */
+@media screen and (max-width: 480px) {
+    /* Further table adjustments for very small screens */
+    th, td {
+        font-size: 0.9em; /* Smaller font size for better fit */
+    }
+
+    .middle-section {
+        flex-basis: 100%; /* Maximum width on very small screens */
+    }
+    .left-section, .right-section {
+        display: none; /* Optionally hide side sections to give more space */
+    }
+}

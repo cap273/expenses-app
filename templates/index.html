@@ -2,22 +2,25 @@
 <html>
 <head>
     <title>Expenses App</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
 </head>
-<body>
+<body user-currency="{{ current_user.currency }}">
     <div class="navbar">
         <div class="nav-container">
             <div class="nav-left-section">
                 <div class="nav-title">Expenses App</div>
             </div>
             <div class="nav-middle-section">
-                <span class="nav-link">Input Expenses</span>
-                <span class="nav-link">View Expenses</span>
+                <a href="{{ url_for('index') }}" class="nav-link">Input Expenses</a>
+                <a href="{{ url_for('view_expenses') }}" class="nav-link">View Expenses</a>
             </div>
             <div class="nav-right-section">
                 <div class="nav-logo">[Logo]</div>
                 <div class="user-info">
-                    <span class="username" id="username">{{ username }}</span>
+                    <span class="display_name" id="display_name">{{ current_user.display_name }}</span>
                     <div class="dropdown-menu" id="dropdownMenu">
                         <a href="/profile">Profile</a>
                         <a href="/settings">Settings</a>
@@ -28,11 +31,12 @@
         </div>
     </div>
     <div class="main-container">
-        <div class="left-section"></div>
-        <div class="middle-section">
+        <div class="left-section narrow-edge-sections"></div>
+        <div class="middle-section container-center-align">
             <form id="expensesForm" action="/submit" method="post">
                 <table id="inputTable">
                     <tr>
+                        <th>Expense Scope</th>
                         <th>Day</th>
                         <th>Month</th>
                         <th>Year</th>
@@ -41,6 +45,15 @@
                         <th>Additional Notes</th>
                     </tr>
                     <tr>
+                        <td>
+                            <select name="scope[]" required>
+                                <option value="" selected disabled hidden></option>
+                                <option value="Joint">Joint</option>
+                                {% for person in persons %}
+                                <option value="{{ person.PersonID }}">{{ person.PersonName }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
                         <td><input type="number" name="day[]" min="1" max="31" required></td>
                         <td>
                             <select name="month[]" required>
@@ -83,8 +96,9 @@
                 </div>
             </form>
         </div>
-        <div class="right-section"></div>
+        <div class="right-section narrow-edge-sections"></div>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

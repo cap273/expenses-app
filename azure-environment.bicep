@@ -16,7 +16,7 @@ var createExpensesTableScript = '''
   CREATE TABLE expenses (
     ExpenseID INT PRIMARY KEY IDENTITY,
     AccountID INT NOT NULL, -- User account ID that created this expense
-    ResponsibleEntity NVARCHAR(255), -- Either 'Joint' or the name of the responsible individual
+    ExpenseScope NVARCHAR(255), -- Either 'Joint' or the name of the responsible individual
     PersonID INT, -- Foreign key to the persons table, NULL if it's a joint expense
     Day INT NOT NULL,
     Month NVARCHAR(50) NOT NULL,
@@ -52,6 +52,8 @@ var createAccountsTableScript = '''
     AccountName NVARCHAR(255) NOT NULL,
     UserEmail NVARCHAR(255) UNIQUE,
     Password NVARCHAR(255),
+    AccountDisplayName NVARCHAR(255),
+    Currency NVARCHAR(255),
     CreateDate DATE,
     LastUpdated DATE,
     LastLoginDate DATE
@@ -133,6 +135,33 @@ var createTriggersForDateTrackingScript = '''
       SET e.ExpenseDayOfWeek = DATENAME(dw, i.ExpenseDate)
       FROM expenses e
       INNER JOIN inserted i ON e.ExpenseID = i.ExpenseID
+  END;
+  GO
+
+  -- Trigger for the 'accounts' table for new records
+  CREATE TRIGGER trg_accounts_insert
+  ON accounts
+  AFTER INSERT
+  AS
+  BEGIN
+      UPDATE accounts
+      SET CreateDate = CAST(GETDATE() AS DATE),
+          LastUpdated = CAST(GETDATE() AS DATE)
+      FROM accounts
+      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
+  END;
+  GO
+
+  -- Trigger for the 'accounts' table for updates
+  CREATE TRIGGER trg_accounts_update
+  ON accounts
+  AFTER UPDATE
+  AS
+  BEGIN
+      UPDATE accounts
+      SET LastUpdated = CAST(GETDATE() AS DATE)
+      FROM accounts
+      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
   END;
   GO
 

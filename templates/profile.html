@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile - Expenses App</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-container">
+            <div class="nav-left-section">
+                <div class="nav-title">Expenses App</div>
+            </div>
+            <div class="nav-middle-section">
+                <a href="{{ url_for('index') }}" class="nav-link">Input Expenses</a>
+                <a href="{{ url_for('view_expenses') }}" class="nav-link">View Expenses</a>
+            </div>
+            <div class="nav-right-section">
+                <div class="nav-logo">[Logo]</div>
+                <div class="user-info">
+                    <span class="display_name" id="display_name">{{ current_user.display_name }}</span>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/profile">Profile</a>
+                        <a href="/settings">Settings</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>            
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="left-section wide-edge-sections">
+            <div class="user-details-top">
+                <h3>Username: {{ current_user.account_name }}</h3>
+            </div>
+        </div>
+        <div class="middle-section narrow-middle-section">
+            <div class="form-container form-top-margin">
+                <form action="{{ url_for('update_profile') }}" method="post" class="profile-form no-box-shadow">
+                    <h2>Update Profile</h2>
+                    <hr class="section-divider">
+
+                    <!-- Update Display Name -->
+                    <h3 class="form-heading">Update Display Name</h3>
+                    <input type="text" id="display_name" name="display_name" value="{{ current_user.display_name }}">
+                    <div class="note">
+                        This will change the display name, but not the username with which you log in.
+                    </div>
+
+                    <!-- Update Persons Associated with Account -->
+                    <h3 class="form-heading">Manage Associated Persons</h3>
+                    <div class="note">
+                        You can change the name of people already associated with your account.
+                        You can also add new people to this account.
+                        However, you cannot delete a person already associated with your account.
+                    </div>
+                    <div id="person-container">
+                        {% if persons %}
+                            {% for person in persons %}
+                            <div class="person-entry">
+                                <span>{{ loop.index }}.</span>
+                                <input type="hidden" name="person_ids[]" value="{{ person.PersonID }}">
+                                <input type="text" name="person_names[]" value="{{ person.PersonName }}">
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button type="button" class="inform-profile-btn" onclick="addPerson()">Add Person</button>
+
+                    <h3 class="form-heading">Update Currency</h3>
+                    <select name="currency" id="currency">
+                        <option value="USD" {% if current_user.currency == 'USD' %}selected{% endif %}>USD</option>
+                        <option value="EUR" {% if current_user.currency == 'EUR' %}selected{% endif %}>Euros</option>
+                    </select>
+
+                    <h3 class="form-heading">Change Password</h3>
+                    <label for="new_password">New Password:</label>
+                    <input type="password" id="new_password" name="new_password">
+
+                    <hr class="section-divider">
+                    <button type="submit" class="update-profile-btn">Update Profile</button>
+                </form>
+            </div>
+        </div>
+        <div class="right-section wide-edge-sections"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+</body>
+</html>

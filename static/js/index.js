@@ -1,3 +1,15 @@
+// Access the currency from the user's current session
+let currency = document.body.getAttribute('user-currency');
+let currencySymbol = currency === 'USD' ? '$' : '€';
+
+// Get all elements with the class 'amount-input-wrapper'
+let elements = document.getElementsByClassName('amount-input-wrapper');
+
+// Loop through all elements and add the currency symbol
+for(let i = 0; i < elements.length; i++) {
+    elements[i].style.setProperty('--currency-symbol', `"${currencySymbol}"`);
+}
+
 var addRowBtn = document.getElementById('addRowBtn');
 addRowBtn.addEventListener('click', function() {
     var table = document.getElementById('inputTable');
@@ -46,26 +58,6 @@ deleteRowBtn.addEventListener('click', function() {
     deleteRowBtn.focus();
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('username').addEventListener('click', function() {
-        var dropdown = document.getElementById('dropdownMenu');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    });
-
-    // Optional: Close the dropdown if clicked outside
-    window.onclick = function(event) {
-        if (!event.target.matches('.username')) {
-            var dropdowns = document.getElementsByClassName("dropdown-menu");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.style.display === 'block') {
-                    openDropdown.style.display = 'none';
-                }
-            }
-        }
-    }
-});
-
 document.addEventListener('input', function(e) {
     if (e.target.name.startsWith('amount')) {
         // Remove all non-numeric characters except for the dot
@@ -103,14 +95,4 @@ form.addEventListener('submit', function(event) {
         }
     }
 });
-
-function isValidDate(day, monthName, year) {
-    var monthIndex = new Date(Date.parse(monthName +" 1, 2020")).getMonth(); // Get month as a number
-    var parsedDate = new Date(year, monthIndex, day);
-
-    // Check if the parsed date's year, month, and day match the input values
-    return parsedDate.getFullYear() == year &&
-           parsedDate.getMonth() == monthIndex &&
-           parsedDate.getDate() == day;
-}
 

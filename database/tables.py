@@ -33,7 +33,7 @@ CATEGORY_LIST = [
     "Healthcare and Medical",
     "Gifts and Donations",
     "Software and Electronics",
-    "Education",
+    "Education (including student loans)",
     "Internet, Cell Phone, and TV",
     "Miscellaneous",
     "Restaurant and Takeout (Social)",
@@ -44,7 +44,7 @@ CATEGORY_LIST = [
     "Mortgage Insurance",
     "Homeowners Insurance",
     "Property Taxes",
-    "Mortgage P and I",
+    "Mortgage Principal and Interest",
     "Home Services",
     "Capital Improvements",
     "Landlord Expenses",
@@ -57,7 +57,7 @@ expenses_table = Table(
     Column("ExpenseID", Integer, primary_key=True),
     Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
     Column(
-        "ResponsibleEntity", String(255)
+        "ExpenseScope", String(255)
     ),  # Either 'Joint' or the name of an individual
     Column(
         "PersonID", Integer, ForeignKey("persons.PersonID"), nullable=True
@@ -92,16 +92,4 @@ categories_table = Table(
     Column("CreateDate", Date),
     Column("LastUpdated", Date),
     extend_existing=False,
-)
-
-# Define the persons table
-persons_table = Table(
-    "persons",
-    metadata,
-    Column("PersonID", Integer, primary_key=True),
-    Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
-    Column("PersonName", String(255), nullable=False),
-    Column("CreateDate", Date),
-    Column("LastUpdated", Date),
-    extend_existing=True,
 )

@@ -1,0 +1,93 @@
+/* Fixed table layout */
+#expensesForm table {
+    table-layout: fixed; /* Ensures that column widths are respected */
+    width: 100%;
+}
+
+/* Column widths applied to both headers and data cells */
+#expensesForm table th, #expensesForm table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+    font-size: 1em;
+}
+
+/* Adjusting specific column widths with more specific selectors for column widths */
+#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(1) { /* ExpenseScope column */
+    width: 6%;
+}
+
+#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(1) { /* Day column */
+    width: 6%;
+}
+
+#expensesForm table th:nth-child(3), #expensesForm table td:nth-child(2) { /* Month column */
+    width: 12%;
+}
+
+#expensesForm table th:nth-child(4), #expensesForm table td:nth-child(3) { /* Year column */
+    width: 9%;
+}
+
+#expensesForm table th:nth-child(5), #expensesForm table td:nth-child(4) { /* Amount column */
+    width: 9%;
+}
+
+#expensesForm table th:nth-child(6), #expensesForm table td:nth-child(5) { /* Expense Category column */
+    width: 28%;
+}
+
+#expensesForm table th:nth-child(7), #expensesForm table td:nth-child(6) { /* Additional Notes column */
+    width: auto; /* Takes up remaining space */
+}
+
+/* Ensure input and select elements fit within table cells */
+#expensesForm table input, #expensesForm table select {
+    width: 100%; /* Make input and select elements fill the cell */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.amount-input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.amount-input-wrapper::before {
+    content: var(--currency-symbol, '$'); /* default to $ if --currency-symbol is not set */
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: gray;
+    pointer-events: none;
+    font-size: 1em;
+    z-index: 1;
+}
+
+input[name^="amount"] {
+    padding-left: 20px; /* Make space for the dollar sign */
+}
+
+/* Media Query for Medium Screens */
+@media screen and (max-width: 1024px) {
+
+    #expensesForm table th {
+        font-size: 0.9em; /* Slightly smaller font size for medium screens */
+    }
+}
+
+/* Media Query for Mobile Screens */
+@media screen and (max-width: 768px) {
+
+    #expensesForm table th {
+        font-size: 0.8em; /* Even smaller font size for small screens */
+    }
+}
+
+/* Additional Media Query for Very Small Screens */
+@media screen and (max-width: 480px) {
+    
+    #expensesForm table th {
+        font-size: 0.7em; /* Smallest font size for very small screens */
+    }
+}
