@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Expenses App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-container">
+            <div class="nav-left-section">
+                <div class="nav-title">Expenses App</div>
+            </div>
+            <!-- Empty middle and right sections for login page -->
+            <div class="nav-middle-section"></div>
+            <div class="nav-right-section"></div>
+        </div>
+    </div>
+    <div class="login-container">
+        <form action="{{ url_for('login') }}" method="post" class="login-form">
+            {% if error_message %}
+                <p class="error">{{ error_message }}</p>
+            {% endif %}
+            <h2>Login</h2>
+            <input type="text" name="username" placeholder="Username or Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            {% if message %}
+            <p class="error">{{ message }}</p>
+            {% endif %}
+        </form>
+        <div class="account-create-link">
+            <a href="{{ url_for('create_account') }}">Create New Account</a>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

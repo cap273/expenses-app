@@ -1,4 +1,20 @@
 from sqlalchemy import select
+import pyodbc
+
+
+def get_database_url(db_username, db_password, db_server, db_name):
+    drivers = [driver for driver in pyodbc.drivers()]
+    driver = None
+
+    if "ODBC Driver 18 for SQL Server" in drivers:
+        driver = "ODBC+Driver+18+for+SQL+Server"
+    elif "ODBC Driver 17 for SQL Server" in drivers:
+        driver = "ODBC+Driver+17+for+SQL+Server"
+    else:
+        raise Exception("Suitable ODBC driver not found")
+
+    # Database URL using environment variables.
+    return f"mssql+pyodbc://{db_username}:{db_password}@{db_server}/{db_name}?driver={driver}"
 
 
 def populate_categories_table(engine, categories_table, category_list):

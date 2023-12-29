@@ -1,27 +1,27 @@
 from flask import Flask, request, render_template, redirect, url_for
-import pyodbc
-from sqlalchemy import (
-    create_engine,
-    MetaData,
-    Table,
-    Column,
-    Integer,
-    String,
-    Float,
-    Date,
-    Boolean,
-    ForeignKey,
-)
+from sqlalchemy import create_engine, update
 from sqlalchemy.exc import SQLAlchemyError
 import os
 from dotenv import load_dotenv
 import logging
 from datetime import datetime, date
+from flask_login import (
+    LoginManager,
+    login_required,
+    logout_user,
+    current_user,
+)
+from urllib.parse import urlparse
 
-from utils.db import populate_categories_table, get_categories
-from utils.session import get_current_currency, get_current_user_account_id
-
-app = Flask(__name__)
+from utils.db_tools import populate_categories_table, get_categories, get_database_url
+from utils.session import get_current_currency, login_and_update_last_login
+from database.models import db, Account
+from database.tables import (
+    expenses_table,
+    categories_table,
+    persons_table,
+    CATEGORY_LIST,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,148 +40,136 @@ if FLASK_ENV == "development":
 else:
     logging.basicConfig(level=logging.WARNING)
 
+DATABASE_URL = get_database_url(DB_USERNAME, DB_PASSWORD, DB_SERVER, DB_NAME)
 
-def get_database_url():
-    drivers = [driver for driver in pyodbc.drivers()]
-    driver = None
+app = Flask(__name__)
+app.secret_key = os.environ.get(
+    "FLASK_SECRET_KEY"
+)  # Set the secret key to use for Flask sessions
 
-    if "ODBC Driver 18 for SQL Server" in drivers:
-        driver = "ODBC Driver 18 for SQL Server"
-    elif "ODBC Driver 17 for SQL Server" in drivers:
-        driver = "ODBC Driver 17 for SQL Server"
-    else:
-        raise Exception("Suitable ODBC driver not found")
+# Using the ORM operations of Flask-SQLAlchemy to utilize
+# Flask extensions like Flask-Login
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+db.init_app(app)  # Attach the SQLAlchemy instance to the Flask app
 
-    # Database URL using environment variables. Using ODBC Driver 17 for SQL Server
-    return f"mssql+pyodbc://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}?driver={driver}"
+# Using SQLAlchemy Core to run lower-level database operations
+engine = create_engine(DATABASE_URL)  # Create an engine for SQLAlchemy Core
 
-
-DATABASE_URL = get_database_url()
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 if FLASK_ENV == "development":
     print("Database URL: ", DATABASE_URL)
 
-engine = create_engine(DATABASE_URL)
-metadata = MetaData()
 
-# Define the expenses table
-expenses_table = Table(
-    "expenses",
-    metadata,
-    Column("ExpenseID", Integer, primary_key=True),
-    Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
-    Column("ResponsibleEntity", String(255)),  # Either 'Joint' or the name of an individual
-    Column("PersonID", Integer, ForeignKey("persons.PersonID"), nullable=True), # NULL if it's a joint expense
-    Column("Day", Integer, nullable=False),
-    Column("Month", String(50), nullable=False),
-    Column("Year", Integer, nullable=False),
-    Column("ExpenseDate", Date, nullable=False),
-    Column("ExpenseDayOfWeek", String(50)),
-    Column("Amount", Float, nullable=False),
-    Column("AdjustedAmount", Float),  # Amount after adjustments
-    Column("ExpenseCategory", String(255), nullable=False),
-    Column("AdditionalNotes", String(255)),
-    Column("CreateDate", Date),
-    Column("LastUpdated", Date),
-    Column("Currency", String(50)),
-    Column("ManualCategory", String(255)),
-    Column("SuggestedCategory", String(255)),
-    Column("CategoryConfirmed", Boolean),
-    extend_existing=False,
-    # Set implicit_returning to False so that
-    # SQLAlchemy won't try to use the OUTPUT clause to fetch the inserted ID.
-    # This should avoid conflicts with database triggers for ID generation
-    implicit_returning=False,
-)
-
-# Define the categories table
-categories_table = Table(
-    "categories",
-    metadata,
-    Column("CategoryID", Integer, primary_key=True),
-    Column("CategoryName", String(255), unique=True, nullable=False),
-    Column("CreateDate", Date),
-    Column("LastUpdated", Date),
-    extend_existing=False,
-)
-
-# Define list of categories
-CATEGORY_LIST = [
-    "Restaurant and Takeout (Non-Social)",
-    "Shoes and Clothing",
-    "Groceries",
-    "Alcohol",
-    "Entertainment",
-    "Utilities",
-    "Sports and Fitness",
-    "Haircuts and Cosmetics",
-    "Airplane Flights",
-    "Hotel and Lodging",
-    "Car-Related Expenses (excluding gasoline)",
-    "Taxi and Ride-Sharing",
-    "Gasoline",
-    "Household Goods",
-    "Other Transportation Expenses",
-    "Healthcare and Medical",
-    "Gifts and Donations",
-    "Software and Electronics",
-    "Education",
-    "Internet, Cell Phone, and TV",
-    "Miscellaneous",
-    "Restaurant and Takeout (Social)",
-    "Rent",
-    "Interest and Banking Fees",
-    "Car and Renters Insurance",
-    "Other Memberships and Fees",
-    "Mortgage Insurance",
-    "Homeowners Insurance",
-    "Property Taxes",
-    "Mortgage P and I",
-    "Home Services",
-    "Capital Improvements",
-    "Landlord Expenses",
-]
-
-# Define the accounts table
-accounts_table = Table(
-    "accounts",
-    metadata,
-    Column("AccountID", Integer, primary_key=True),
-    Column("AccountName", String(255), nullable=False),
-    Column("CreateDate", Date),
-    Column("LastUpdated", Date),
-    extend_existing=True,
-)
-
-# Define the persons table
-persons_table = Table(
-    "persons",
-    metadata,
-    Column("PersonID", Integer, primary_key=True),
-    Column("AccountID", Integer, ForeignKey("accounts.AccountID"), nullable=False),
-    Column("PersonName", String(255), nullable=False),
-    Column("CreateDate", Date),
-    Column("LastUpdated", Date),
-    extend_existing=True,
-)
+# user_loader callback
+@login_manager.user_loader
+def load_user(user_id):
+    return Account.query.get(int(user_id))
 
 
 # metadata.create_all(engine)  # Create the tables if they don't exist
 populate_categories_table(engine, categories_table, CATEGORY_LIST)
 
 
+# Login view
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error_message = None
+    if request.method == "POST":
+        user = Account.query.filter(
+            (Account.account_name == request.form["username"])
+            | (Account.user_email == request.form["username"])
+        ).first()
+        if user and user.check_password(request.form["password"]):
+            login_and_update_last_login(user, engine)
+
+            # The 'next' URL parameter is a feature of Flask-Login, which is used to handle the redirection of unauthenticated users
+            next_page = request.args.get("next")
+
+            # If there's no next page specified, or if the next page is for a different site (i.e., it has a network location component),
+            # then default to redirecting to the index page
+            if not next_page or urlparse(next_page).netloc != "":
+                next_page = url_for("index")
+
+            # Redirect to the next page (either the specified next page or the default index page)
+            return redirect(next_page)
+        else:
+            error_message = "Invalid username or password"
+    return render_template("login.html", error_message=error_message)
+
+
+@app.route("/create_account", methods=["GET", "POST"])
+def create_account():
+    error_message = None
+    if request.method == "POST":
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
+
+        # Check if username already exists
+        existing_user_by_username = Account.query.filter_by(
+            account_name=username
+        ).first()
+        if existing_user_by_username:
+            error_message = "Username already exists."
+        else:
+            # Check if email already exists
+            existing_user_by_email = Account.query.filter_by(user_email=email).first()
+            if existing_user_by_email:
+                error_message = "Email address already exists."
+            else:
+                # Create new user instance
+                new_user = Account(account_name=username, user_email=email)
+
+                # Set password (this will hash the password)
+                new_user.set_password(password)
+
+                # Add new user to database
+                db.session.add(new_user)
+                db.session.commit()
+
+                # Authenticate and login the new user
+                login_and_update_last_login(new_user, engine)
+
+                # Redirect to the index page
+                return redirect(url_for("index"))
+
+    return render_template("create_account.html", error_message=error_message)
+
+
+# Logout view
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+# Main page view
 @app.route("/", methods=["GET"])
+@login_required
 def index():
     categories = get_categories(engine, categories_table)
     current_currency = get_current_currency()
 
-    return render_template("index.html", categories=categories, currency=current_currency)
+    # Get the username of the logged-in user
+    username = current_user.account_name
+
+    return render_template(
+        "index.html",
+        categories=categories,
+        currency=current_currency,
+        username=username,
+    )
 
 
 @app.route("/submit", methods=["POST"])
+@login_required
 def submit():
     form_data = request.form
-    current_user_account_id = get_current_user_account_id()
+    current_user_account_id = current_user.id
 
     # Process the form data
     rows = zip(

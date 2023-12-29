@@ -8,6 +8,8 @@ param sqlAdministratorLogin string
 param allowedIpAddress string
 @secure()
 param sqlAdministratorPassword string
+@secure()
+param flaskSecretKey string
 
 // SQL database initialization scripts
 var createExpensesTableScript = '''
@@ -28,7 +30,6 @@ var createExpensesTableScript = '''
     CreateDate DATE,
     LastUpdated DATE,
     Currency NVARCHAR(50), -- Currency of the transaction
-    ManualCategory NVARCHAR(255), -- Category as manually set by the user
     SuggestedCategory NVARCHAR(255), -- Category suggested by the ML model
     CategoryConfirmed BIT, -- Indicates if the user confirmed the ML-suggested category
     FOREIGN KEY (AccountID) REFERENCES accounts(AccountID),
@@ -49,8 +50,11 @@ var createAccountsTableScript = '''
   CREATE TABLE accounts (
     AccountID INT PRIMARY KEY IDENTITY,
     AccountName NVARCHAR(255) NOT NULL,
+    UserEmail NVARCHAR(255) UNIQUE,
+    Password NVARCHAR(255),
     CreateDate DATE,
-    LastUpdated DATE
+    LastUpdated DATE,
+    LastLoginDate DATE
   );
 '''
 
@@ -132,33 +136,6 @@ var createTriggersForDateTrackingScript = '''
   END;
   GO
 
-  -- Trigger for the 'accounts' table for new records
-  CREATE TRIGGER trg_accounts_insert
-  ON accounts
-  AFTER INSERT
-  AS
-  BEGIN
-      UPDATE accounts
-      SET CreateDate = CAST(GETDATE() AS DATE),
-          LastUpdated = CAST(GETDATE() AS DATE)
-      FROM accounts
-      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
-  END;
-  GO
-
-  -- Trigger for the 'accounts' table for updates
-  CREATE TRIGGER trg_accounts_update
-  ON accounts
-  AFTER UPDATE
-  AS
-  BEGIN
-      UPDATE accounts
-      SET LastUpdated = CAST(GETDATE() AS DATE)
-      FROM accounts
-      INNER JOIN inserted i ON accounts.AccountID = i.AccountID
-  END;
-  GO
-
   -- Trigger for the 'persons' table for new records
   CREATE TRIGGER trg_persons_insert
   ON persons
@@ -226,6 +203,10 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'FLASK_ENV'
           value: flaskEnvironment
+        }
+        {
+          name: 'FLASK_SECRET_KEY'
+          value: flaskSecretKey
         }
       ]
       linuxFxVersion: 'Python|3.12'

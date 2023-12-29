@@ -289,3 +289,78 @@ button {
         font-size: 0.7em; /* Smallest font size for very small screens */
     }
 }
+
+.login-container, .account-creation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Ensure items are stacked vertically */
+    height: 80vh; /* Adjust height as needed */
+}
+
+.login-form, .account-creation-form {
+    width: 300px;
+    padding: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2); /* Adds subtle shadow */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #ffffff; /* White background */
+    text-align: center;
+}
+
+.login-form h2, .account-creation-form h2 {
+    text-align: center;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"],
+.account-creation-form input[type="text"],
+.account-creation-form input[type="email"],
+.account-creation-form input[type="password"] {
+    width: calc(100% - 20px); /* Adjust width to account for padding */
+    padding: 10px; /* Add padding for spacing */
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.login-form button, .account-creation-form button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: orange;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-form button:hover, .account-creation-form button:hover {
+    background-color: darkorange;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px; /* Add some spacing */
+}
+
+.account-create-link {
+    margin-top: 10px; /* Space between the link and the login button */
+    text-align: center; /* Center the link */
+}
+
+.account-create-link a {
+    color: #007bff; /* Different color for differentiation */
+    font-size: 0.9em; /* Smaller size */
+    text-decoration: none; /* Remove underline */
+}
+
+.account-create-link a:hover {
+    text-decoration: underline; /* Add underline on hover for better user experience */
+}
+
+.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px; /* Add some spacing */
+}
