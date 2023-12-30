@@ -1,3 +1,14 @@
+/* Style for the expenses header */
+.expenses-header {
+    text-align: center; /* Center the text */
+    padding: 20px 0; /* Add padding above and below the header */
+    font-size: 1.5em; /* Increase the font size */
+    margin-bottom: 20px; /* Extra space between header and form */
+    width: 100%; /* Ensure it spans the full width */
+    color: #333; /* Set a color for the text, change as needed */
+    font-weight: bold; /* Make the header text bold */
+}
+
 /* Fixed table layout */
 #expensesForm table {
     table-layout: fixed; /* Ensures that column widths are respected */
@@ -81,6 +92,10 @@ input[name^="amount"] {
 
     #expensesForm table th {
         font-size: 0.8em; /* Even smaller font size for small screens */
+    }
+
+    .expenses-header {
+        font-size: 1.2em; /* Slightly smaller font size for small screens */
     }
 }
 

@@ -67,6 +67,7 @@
 
 .middle-section {
     display: flex;
+    flex-direction: column; /* Stack children vertically */
     justify-content: center;
     align-items: center;
     background-color: #fff; /* For visibility */
