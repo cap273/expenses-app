@@ -24,7 +24,6 @@
                     <span class="display_name" id="display_name">{{ current_user.display_name }}</span>
                     <div class="dropdown-menu" id="dropdownMenu">
                         <a href="/profile">Profile</a>
-                        <a href="/settings">Settings</a>
                         <a href="/logout">Logout</a>
                     </div>
                 </div>
@@ -33,7 +32,7 @@
     </div>
     <div class="main-container">
         <div class="left-section narrow-edge-sections"></div>
-        <div class="middle-section container-center-align">
+        <div class="middle-section wide-middle-section">
             <form id="expensesForm" action="/submit" method="post">
                 <table id="inputTable">
                     <tr>

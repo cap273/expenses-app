@@ -128,7 +128,7 @@ def create_account():
                     account_name=username,
                     user_email=email,
                     display_name=username,
-                    currency='USD', # Default to USD
+                    currency="USD",  # Default to USD
                 )
 
                 # Set password (this will hash the password)
@@ -172,14 +172,14 @@ def index():
     persons = Person.query.filter_by(AccountID=current_user.id).all()
 
     # Also convert to JSON
-    persons_data = [{"PersonID": person.PersonID, "PersonName": person.PersonName} for person in persons]
+    persons_data = [
+        {"PersonID": person.PersonID, "PersonName": person.PersonName}
+        for person in persons
+    ]
     persons_json = json.dumps(persons_data)
 
     return render_template(
-        "index.html",
-        categories=categories,
-        persons=persons,
-        persons_json=persons_json
+        "index.html", categories=categories, persons=persons, persons_json=persons_json
     )
 
 
@@ -215,7 +215,7 @@ def submit():
                     conn.execute(
                         expenses_table.insert().values(
                             AccountID=current_user_account_id,
-                            ExpenseScope=expense_scope, # Set to Joint or Individual
+                            ExpenseScope=expense_scope,  # Set to Joint or Individual
                             PersonID=person_id,  # Set to None if Joint, otherwise set to PersonID
                             Day=day,
                             Month=month,
@@ -246,7 +246,6 @@ def submit():
 @app.route("/view_expenses")
 @login_required
 def view_expenses():
-
     # Create a SQL query to select expenses for the current user
     query = select(
         expenses_table.c.ExpenseDate,
@@ -266,9 +265,9 @@ def view_expenses():
 
     # Format the amount in each expense
     for expense in expenses:
-        if expense["Currency"] == 'USD':
+        if expense["Currency"] == "USD":
             expense["Amount"] = "${:,.2f}".format(expense["Amount"])
-        elif expense["Currency"] == 'EUR':
+        elif expense["Currency"] == "EUR":
             expense["Amount"] = "€{:,.2f}".format(expense["Amount"])
 
     return render_template("view_expenses.html", expenses=expenses)
@@ -310,11 +309,13 @@ def update_profile():
     person_names = request.form.getlist("person_names[]")
 
     for person_id, person_name in zip(person_ids, person_names):
-        if person_id == 'new':
+        if person_id == "new":
             new_person = Person(AccountID=current_user.id, PersonName=person_name)
             db.session.add(new_person)
         else:
-            person = Person.query.filter_by(PersonID=person_id, AccountID=current_user.id).first()
+            person = Person.query.filter_by(
+                PersonID=person_id, AccountID=current_user.id
+            ).first()
             if person:
                 person.PersonName = person_name
 
