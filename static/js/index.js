@@ -2,6 +2,9 @@
 let currency = document.body.getAttribute('user-currency');
 let currencySymbol = currency === 'USD' ? '$' : '€';
 
+// Access list of persons associated with the current user
+let persons_json = JSON.parse(document.body.getAttribute('persons_json') || '[]');
+
 // Get all elements with the class 'amount-input-wrapper'
 let elements = document.getElementsByClassName('amount-input-wrapper');
 
@@ -16,8 +19,23 @@ addRowBtn.addEventListener('click', function() {
     var newRow = table.insertRow(-1);
     var lastRow = table.rows[table.rows.length - 2]; // Get the last input row
 
-    var lastMonth = lastRow.cells[1].querySelector('select').value;
-    var lastYear = lastRow.cells[2].querySelector('input').value;
+    var lastScope = lastRow.cells[0].querySelector('select').value; // Capture last scope value
+    var lastMonth = lastRow.cells[2].querySelector('select').value;
+    var lastYear = lastRow.cells[3].querySelector('input').value;
+
+    // Create a new select element for ExpenseScope
+    var scopeSelectHTML = '<select name="scope[]" required>' +
+        '<option value="" disabled hidden></option>' +
+        '<option value="Joint"' + (lastScope === 'Joint' ? ' selected' : '') + '>Joint</option>';
+
+    // Add options for each person
+    persons_json.forEach(function(person) {
+        scopeSelectHTML += '<option value="' + person.PersonID + '"' +
+            (lastScope === String(person.PersonID) ? ' selected' : '') + '>' +
+            person.PersonName + '</option>';
+    });
+
+    scopeSelectHTML += '</select>';
 
     var dayInput = '<input type="number" name="day[]" min="1" max="31" required>';
     var monthSelect = '<select name="month[]">' + 
@@ -37,10 +55,10 @@ addRowBtn.addEventListener('click', function() {
         '</select>';
     var yearInput = '<input type="number" name="year[]" min="2000" max="2050" required value="' + lastYear + '">';
     var amountInput = '<div class="amount-input-wrapper"><input type="text" name="amount[]" title="Please enter a valid amount with up to two decimal places. Example: 1,234.56" required></div>';
-    var categorySelect = lastRow.cells[4].innerHTML; // Copy the Category dropdown
+    var categorySelect = lastRow.cells[5].innerHTML; // Copy the Category dropdown
     var notesInput = '<input type="text" name="notes[]">';
 
-    newRow.innerHTML = `<td>${dayInput}</td><td>${monthSelect}</td><td>${yearInput}</td><td>${amountInput}</td><td>${categorySelect}</td><td>${notesInput}</td>`;
+    newRow.innerHTML = `<td>${scopeSelectHTML}</td><td>${dayInput}</td><td>${monthSelect}</td><td>${yearInput}</td><td>${amountInput}</td><td>${categorySelect}</td><td>${notesInput}</td>`;
 
     // Set focus to the Add Row button
     addRowBtn.focus();

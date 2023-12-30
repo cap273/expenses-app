@@ -20,3 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Display name element or dropdown menu not found.');
     }
 });
+
+function isValidDate(day, monthName, year) {
+    var monthIndex = new Date(Date.parse(monthName +" 1, 2020")).getMonth(); // Get month as a number
+    var parsedDate = new Date(year, monthIndex, day);
+
+    // Check if the parsed date's year, month, and day match the input values
+    return parsedDate.getFullYear() == year &&
+           parsedDate.getMonth() == monthIndex &&
+           parsedDate.getDate() == day;
+}

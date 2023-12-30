@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for
 from sqlalchemy import create_engine, select, update
 from sqlalchemy.exc import SQLAlchemyError
 import os
+import json
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
@@ -170,10 +171,15 @@ def index():
     # Fetch persons associated with the current user's account
     persons = Person.query.filter_by(AccountID=current_user.id).all()
 
+    # Also convert to JSON
+    persons_data = [{"PersonID": person.PersonID, "PersonName": person.PersonName} for person in persons]
+    persons_json = json.dumps(persons_data)
+
     return render_template(
         "index.html",
         categories=categories,
         persons=persons,
+        persons_json=persons_json
     )
 
 
@@ -220,6 +226,7 @@ def submit():
                             ),  # Ensure no commas in submission from thousands separator
                             ExpenseCategory=category,
                             AdditionalNotes=notes,
+                            Currency=current_user.currency,
                         )
                     )
 
@@ -246,6 +253,7 @@ def view_expenses():
         expenses_table.c.Amount,
         expenses_table.c.ExpenseCategory,
         expenses_table.c.AdditionalNotes,
+        expenses_table.c.Currency,
     ).where(expenses_table.c.AccountID == current_user.id)
 
     # Execute the query using SQLAlchemy Core
@@ -258,9 +266,9 @@ def view_expenses():
 
     # Format the amount in each expense
     for expense in expenses:
-        if current_user.currency == 'USD':
+        if expense["Currency"] == 'USD':
             expense["Amount"] = "${:,.2f}".format(expense["Amount"])
-        elif current_user.currency == 'EUR':
+        elif expense["Currency"] == 'EUR':
             expense["Amount"] = "€{:,.2f}".format(expense["Amount"])
 
     return render_template("view_expenses.html", expenses=expenses)
@@ -283,6 +291,7 @@ def profile():
 def update_profile():
     display_name = request.form.get("display_name")
     new_password = request.form.get("new_password")
+    new_currency = request.form.get("currency")  # Get the new currency from the form
 
     # Update display name
     if display_name:
@@ -292,6 +301,10 @@ def update_profile():
     if new_password:
         # Hash the new password
         current_user.set_password(new_password)
+
+    # Update currency, if different
+    if new_currency and new_currency != current_user.currency:
+        current_user.currency = new_currency
 
     person_ids = request.form.getlist("person_ids[]")
     person_names = request.form.getlist("person_names[]")

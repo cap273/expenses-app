@@ -13,31 +13,31 @@
 }
 
 /* Adjusting specific column widths with more specific selectors for column widths */
-#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(1) { /* ExpenseScope column */
+#expensesForm table th:nth-child(1), #expensesForm table td:nth-child(1) { /* ExpenseScope column */
     width: 6%;
 }
 
-#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(1) { /* Day column */
+#expensesForm table th:nth-child(2), #expensesForm table td:nth-child(2) { /* Day column */
     width: 6%;
 }
 
-#expensesForm table th:nth-child(3), #expensesForm table td:nth-child(2) { /* Month column */
+#expensesForm table th:nth-child(3), #expensesForm table td:nth-child(3) { /* Month column */
     width: 12%;
 }
 
-#expensesForm table th:nth-child(4), #expensesForm table td:nth-child(3) { /* Year column */
+#expensesForm table th:nth-child(4), #expensesForm table td:nth-child(4) { /* Year column */
     width: 9%;
 }
 
-#expensesForm table th:nth-child(5), #expensesForm table td:nth-child(4) { /* Amount column */
+#expensesForm table th:nth-child(5), #expensesForm table td:nth-child(5) { /* Amount column */
     width: 9%;
 }
 
-#expensesForm table th:nth-child(6), #expensesForm table td:nth-child(5) { /* Expense Category column */
+#expensesForm table th:nth-child(6), #expensesForm table td:nth-child(6) { /* Expense Category column */
     width: 28%;
 }
 
-#expensesForm table th:nth-child(7), #expensesForm table td:nth-child(6) { /* Additional Notes column */
+#expensesForm table th:nth-child(7), #expensesForm table td:nth-child(7) { /* Additional Notes column */
     width: auto; /* Takes up remaining space */
 }
 
